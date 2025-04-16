@@ -17,7 +17,7 @@ async function askQuestion(step) {
     let question = '';
     switch (step) {
         case 'gatherDomain':
-            question = "Can you describe the domain of your DSL? (e.g., cycling, cooking)";
+            question = "Can you describe the domain of your DSL 2? (e.g., cycling, cooking)";
             break;
         case 'gatherEntities':
             question = "What are the main concepts or things in your domain? (e.g., Bike, Rider)";
