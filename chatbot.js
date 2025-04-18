@@ -11,13 +11,13 @@ let domainInfo = {
 };
 
 const apiKey = 'jYZpbwqDS8jE9VLbAhUj5HOhDvIlTNcK'; // Replace with your actual API key
-const apiUrl = 'https://api.lechat.ai/v1/chat/completions'; // Replace with the actual API endpoint
+const apiUrl = 'https://api.mistral.ai/v1/chat/completions'; // Replace with the actual API endpoint
 
 async function askQuestion(step) {
     let question = '';
     switch (step) {
         case 'gatherDomain':
-            question = "Can you describe the domain of your DSL 2? (e.g., cycling, cooking)";
+            question = "Can you describe the domain of your DSL? (e.g., cycling, cooking)";
             break;
         case 'gatherEntities':
             question = "What are the main concepts or things in your domain? (e.g., Bike, Rider)";
@@ -43,40 +43,53 @@ async function sendMessage() {
     conversationHistory.push({ role: 'user', content: message });
     userInput.value = "";
 
-    const llmResponse = await callLLM(message, currentStep);
-    conversationHistory.push({ role: 'assistant', content: llmResponse });
+    try {
+        const llmResponse = await callLLM(message, currentStep);
+        conversationHistory.push({ role: 'assistant', content: llmResponse });
+        processResponse(llmResponse, currentStep);
 
-    processResponse(llmResponse, currentStep);
+        if (currentStep === 'gatherDomain') {
+            currentStep = 'gatherEntities';
+        } else if (currentStep === 'gatherEntities') {
+            currentStep = 'gatherAttributes';
+        } else if (currentStep === 'gatherAttributes') {
+            currentStep = 'gatherRelationships';
+        } else if (currentStep === 'gatherRelationships') {
+            currentStep = 'generateDSL';
+        }
 
-    if (currentStep === 'gatherDomain') {
-        currentStep = 'gatherEntities';
-    } else if (currentStep === 'gatherEntities') {
-        currentStep = 'gatherAttributes';
-    } else if (currentStep === 'gatherAttributes') {
-        currentStep = 'gatherRelationships';
-    } else if (currentStep === 'gatherRelationships') {
-        currentStep = 'generateDSL';
+        askQuestion(currentStep);
+    } catch (error) {
+        chatbox.innerHTML += `<p><strong>Error:</strong> ${error.message}</p>`;
+        console.error('Error:', error);
     }
-
-    askQuestion(currentStep);
 }
 
 async function callLLM(message, step) {
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-            model: 'lechat',
-            messages: [{ role: 'user', content: message }],
-            step: step
-        })
-    });
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'codestral-latest', // Updated to use the Codestral model
+                messages: [{ role: 'user', content: message }]
+            })
+        });
 
-    const data = await response.json();
-    return data.choices[0].message.content;
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0].message.content;
+    } catch (error) {
+        console.error('Fetch error:', error);
+        throw new Error(`Failed to fetch: ${error.message}`);
+    }
 }
 
 function processResponse(response, step) {
@@ -102,10 +115,29 @@ function processResponse(response, step) {
 }
 
 async function generateDSL() {
-    const dslDescription = JSON.stringify(domainInfo, null, 2);
-    const llmResponse = await callLLM(dslDescription, 'generateDSL');
+    const prompt = `Based on the following information, generate an Ecore file in XML format:
+Domain: ${domainInfo.domain}
+Entities: ${domainInfo.entities.join(', ')}
+Attributes: ${JSON.stringify(domainInfo.attributes)}
+Relationships: ${domainInfo.relationships.join(', ')}`;
 
-    chatbox.innerHTML += `<p><strong>Generated Ecore:</strong></p><pre>${llmResponse}</pre>`;
+    try {
+        const llmResponse = await callLLM(prompt, 'generateDSL');
+        chatbox.innerHTML += `<p><strong>Generated Ecore:</strong></p><pre>${llmResponse}</pre>`;
+
+        // Create a download link for the Ecore file
+        const blob = new Blob([llmResponse], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${domainInfo.domain.toLowerCase().replace(/ /g, '_')}.ecore`;
+        a.textContent = 'Download Ecore File';
+        a.className = 'download-link';
+        chatbox.appendChild(a);
+    } catch (error) {
+        chatbox.innerHTML += `<p><strong>Error:</strong> ${error.message}</p>`;
+        console.error('Error:', error);
+    }
 }
 
 askQuestion(currentStep);
