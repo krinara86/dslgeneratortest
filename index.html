@@ -20,15 +20,15 @@
             margin: 0;
         }
         .chat-container {
-            width: 90%;
-            max-width: 800px;
+            width: 100%;
+            max-width: none;
             background-color: #2c2c2c;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
             border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 80vh;
+            height: 100vh;
         }
         .chat-header {
             background-color: #4a4a4a;
@@ -59,32 +59,41 @@
             text-align: right;
         }
         .input-container {
-            display: flex;
-            padding: 16px;
-            background-color: #2c2c2c;
-            border-top: 1px solid #3a3a3a;
-        }
-        .input-container input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #3a3a3a;
-            border-radius: 8px;
-            margin-right: 8px;
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-        .input-container button {
-            padding: 12px 24px;
-            background-color: #6200ea;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        .input-container button:hover {
-            background-color: #3700b3;
-        }
+        display: flex;
+        align-items: center; /* Align items vertically */
+        padding: 16px;
+        background-color: #2c2c2c;
+        border-top: 1px solid #3a3a3a;
+    }
+    .input-container input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #3a3a3a;
+        border-radius: 8px;
+        margin-right: 8px;
+        background-color: #1e1e1e;
+        color: #e0e0e0;
+        font-size: 1em; /* Increase font size for better readability */
+    }
+    .input-container button {
+        padding: 12px 24px;
+        background-color: #6200ea;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center; /* Align items vertically */
+        font-size: 1em; /* Increase font size for better readability */
+    }
+    .input-container button:hover {
+        background-color: #3700b3;
+    }
+    .input-container button .material-icons {
+        margin-left: 8px; /* Add space between text and icon */
+        font-size: 1.2em; /* Increase icon size */
+    }
         .download-link {
             display: block;
             margin-top: 16px;
