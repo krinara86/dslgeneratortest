@@ -1,129 +1,1110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSL Generator Chatbot</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
-    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .chat-container {
-            width: 100%;
-            max-width: none;
-            background-color: #2c2c2c;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-        .chat-header {
-            background-color: #4a4a4a;
-            color: #e0e0e0;
-            padding: 16px;
-            text-align: center;
-            border-top-left-radius: 12px;
-            border-top-right-radius: 12px;
-            font-size: 1.5em;
-        }
-        .chatbox {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-            border-bottom: 1px solid #3a3a3a;
-        }
-        .chatbox p {
-            margin: 8px 0;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-        .chatbox p:nth-child(odd) {
-            background-color: #3a3a3a;
-        }
-        .chatbox p:nth-child(even) {
-            background-color: #4a4a4a;
-            text-align: right;
-        }
-        .input-container {
-        display: flex;
-        align-items: center; /* Align items vertically */
-        padding: 16px;
-        background-color: #2c2c2c;
-        border-top: 1px solid #3a3a3a;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecore DSL Generator</title>
+  
+  <!-- Material UI CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Custom Styles */
+    body {
+      display: flex;
+      min-height: 100vh;
+      flex-direction: column;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
     }
-    .input-container input {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #3a3a3a;
-        border-radius: 8px;
-        margin-right: 8px;
-        background-color: #1e1e1e;
-        color: #e0e0e0;
-        font-size: 1em; /* Increase font size for better readability */
+
+    main {
+      flex: 1 0 auto;
     }
-    .input-container button {
-        padding: 12px 24px;
-        background-color: #6200ea;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-        display: flex;
-        align-items: center; /* Align items vertically */
-        font-size: 1em; /* Increase font size for better readability */
+
+    .container {
+      margin-top: 20px;
+      margin-bottom: 20px;
     }
-    .input-container button:hover {
-        background-color: #3700b3;
+
+    /* Card styling */
+    .card {
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    .input-container button .material-icons {
-        margin-left: 8px; /* Add space between text and icon */
-        font-size: 1.2em; /* Increase icon size */
+
+    .card .card-content {
+      padding: 24px;
     }
-        .download-link {
-            display: block;
-            margin-top: 16px;
-            padding: 12px;
-            background-color: #6200ea;
-            color: #fff;
-            text-align: center;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: background-color 0.3s;
-        }
-        .download-link:hover {
-            background-color: #3700b3;
-        }
-    </style>
+
+    /* Button styling */
+    .btn, .btn-large {
+      border-radius: 30px;
+      text-transform: none;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .btn-floating {
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* Stepper styling */
+    .stepper {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .stepper .step {
+      flex: 1;
+      position: relative;
+      text-align: center;
+    }
+
+    .stepper .step:not(:last-child):after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      width: 100%;
+      height: 2px;
+      background-color: #e0e0e0;
+      z-index: -1;
+    }
+
+    .stepper .step.active .step-title {
+      color: #3f51b5;
+      font-weight: 500;
+    }
+
+    .stepper .step .step-title {
+      padding: 10px;
+      border-radius: 50%;
+      background-color: white;
+      display: inline-block;
+      color: #9e9e9e;
+      margin-bottom: 10px;
+    }
+
+    .stepper .step.active .step-title:before {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background-color: #3f51b5;
+      border-radius: 50%;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: -1;
+    }
+
+    /* Code preview */
+    .code-preview {
+      background-color: #f0f0f0;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-family: monospace;
+      margin-bottom: 20px;
+    }
+
+    /* Example text */
+    .example-text {
+      font-style: italic;
+      color: #757575;
+      margin-top: 10px;
+    }
+
+    /* Textarea adjustments */
+    textarea {
+      min-height: 100px;
+      border: 1px solid #e0e0e0 !important;
+      border-radius: 4px !important;
+      padding: 10px !important;
+      font-family: 'Roboto', sans-serif !important;
+    }
+
+    /* Loader */
+    .loader-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px;
+    }
+
+    /* Error styling */
+    .error-message {
+      color: #f44336;
+      font-weight: 500;
+    }
+    
+    /* API Config Form */
+    .api-config-form {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .config-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    
+    .config-options .input-field {
+      flex: 1;
+      min-width: 200px;
+    }
+  </style>
 </head>
 <body>
-    <div class="chat-container">
-        <div class="chat-header">
-            <h2>DSL Generator Chatbot</h2>
-        </div>
-        <div id="chatbox" class="chatbox"></div>
-        <div class="input-container">
-            <input type="text" id="userInput" placeholder="Type your answer here...">
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" onclick="sendMessage()">
-                Send
-                <i class="material-icons">send</i>
-            </button>
-        </div>
+  <!-- Navigation -->
+  <nav class="indigo">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Ecore DSL Generator</a>
     </div>
-    <script src="chatbot.js"></script>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <div class="section">
+      <div class="row center-align">
+        <h4>DSL Builder</h4>
+        <p class="grey-text">Create your Domain Specific Language in Ecore format</p>
+      </div>
+      
+      <!-- API Configuration Panel (initially hidden) -->
+      <div id="api-config-panel" class="api-config-form" style="display: none;">
+        <h5>API Configuration</h5>
+        <p>Please update your API settings below:</p>
+        
+        <div class="config-options">
+          <div class="input-field">
+            <input type="text" id="api-key" placeholder="API Key">
+            <label for="api-key">API Key</label>
+          </div>
+          
+          <div class="input-field">
+            <input type="text" id="api-endpoint" placeholder="API Endpoint">
+            <label for="api-endpoint">API Endpoint</label>
+          </div>
+          
+          <div class="input-field">
+            <input type="text" id="api-model" placeholder="Model Name">
+            <label for="api-model">Model Name</label>
+          </div>
+        </div>
+        
+        <div class="right-align">
+          <button id="save-api-config" class="btn indigo">Save Configuration</button>
+          <button id="cancel-api-config" class="btn grey lighten-3 black-text">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Stepper -->
+      <div class="row">
+        <div class="col s12">
+          <ul class="stepper horizontal" id="stepper">
+            <li class="step active">
+              <div class="step-title waves-effect">Domain</div>
+            </li>
+            <li class="step">
+              <div class="step-title waves-effect">Entities</div>
+            </li>
+            <li class="step">
+              <div class="step-title waves-effect">Relationships</div>
+            </li>
+            <li class="step">
+              <div class="step-title waves-effect">Generate</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Chat Bot Container -->
+      <div id="chatbot-container"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="page-footer indigo">
+    <div class="footer-copyright">
+      <div class="container">
+        © 2025 Ecore DSL Generator
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  
+  <!-- Application Script (All-in-one) -->
+  <script>
+    // Configuration for the Ecore DSL Generator
+    const config = {
+    // Replace these values with your actual API credentials
+    apiKey: 'jYZpbwqDS8jE9VLbAhUj5HOhDvIlTNcK', // Your LePlatforme API key
+    endpoint: 'https://api.mistral.ai/v1/chat/completions', // LePlatforme API endpoint
+    modelName: 'mistral-small-latest', // Model name for the completion
+      
+      // Questions to ask the user
+      questions: [
+        { 
+          step: 'gatherDomain', 
+          question: "Can you describe the domain of your DSL?", 
+          instructions: "Please provide a single word for the domain.", 
+          examples: "Examples: cycling, cooking" 
+        },
+        { 
+          step: 'gatherEntities', 
+          question: "What are the main concepts or things in your domain?", 
+          instructions: "Please provide the concepts separated by commas.", 
+          examples: "Examples: Bike, Rider, Race" 
+        },
+        { 
+          step: 'gatherRelationships', 
+          question: "How do these concepts relate to each other?", 
+          instructions: "Please provide the relationships in the format: A (relationship) B.", 
+          examples: "Examples:\n- Bike (owned by) Rider\n- Rider (participates in) Race" 
+        }
+      ]
+    };
+
+    // Parser utilities for extracting structured information from user inputs
+
+    /**
+     * Parses the domain name from user input
+     * @param {string} input - The user's input for domain
+     * @returns {string} - The parsed domain
+     */
+    function parseDomain(input) {
+      // Clean the input and extract the first word as domain
+      return input.trim().split(/\s+/)[0].toLowerCase();
+    }
+
+    /**
+     * Parses entities from comma-separated user input
+     * @param {string} input - The user's input for entities
+     * @returns {string[]} - Array of parsed entities
+     */
+    function parseEntities(input) {
+      // Split by commas and clean each entity
+      return input
+        .split(',')
+        .map(entity => entity.trim())
+        .filter(entity => entity !== '');
+    }
+
+    /**
+     * Parses relationships from user input
+     * @param {string} input - The user's input for relationships
+     * @returns {Object[]} - Array of parsed relationships
+     */
+    function parseRelationships(input) {
+      // Split by lines first
+      const lines = input.split('\n');
+      const relationships = [];
+
+      lines.forEach(line => {
+        // Try to match the pattern "A (relationship) B"
+        const match = line.match(/(.+?)\s*\((.+?)\)\s*(.+)/);
+        if (match) {
+          const [, source, relation, target] = match;
+          relationships.push({
+            source: source.trim(),
+            relationship: relation.trim(),
+            target: target.trim()
+          });
+        }
+      });
+
+      return relationships;
+    }
+
+    /**
+     * Builds the complete domain object from all inputs
+     * @param {Object} data - The collected user inputs
+     * @returns {Object} - Structured domain object
+     */
+    function buildDomainObject(data) {
+      return {
+        domain: data.gatherDomain,
+        entities: data.gatherEntities,
+        relationships: data.gatherRelationships
+      };
+    }
+
+    /**
+     * Generates Ecore format from domain object using LePlatforme API
+     * @param {Object} domainObject - The structured domain object
+     * @returns {Promise<string>} - Promise resolving to the generated Ecore content
+     */
+    function generateEcore(domainObject) {
+      return new Promise((resolve, reject) => {
+        try {
+          // Format the message for the LePlatforme API
+          const prompt = `Generate an Ecore metamodel file for a Domain Specific Language with the following specifications:
+Domain: ${domainObject.domain}
+Main Concepts/Entities: ${domainObject.entities.join(', ')}
+Relationships:
+${domainObject.relationships
+  .map(rel => `- ${rel.source} (${rel.relationship}) ${rel.target}`)
+  .join('\n')}
+
+Please provide only the complete Ecore XMI content with no additional explanations.
+
+Important: Make sure to represent relationships as EReferences within the EClasses. Each entity should be an EClass, and relationships should be EReferences inside the source EClass pointing to the target EClass. Do not create separate EClasses for relationships.`;
+
+          console.log('Sending API request with prompt:', prompt);
+          
+          // Structure the payload according to the LePlatforme API requirements
+     // Structure the payload according to Mistral's API requirements
+const payload = {
+  model: config.modelName,
+  messages: [
+    { role: "user", content: prompt }
+  ],
+  temperature: 0.2
+};
+          
+          console.log('API request payload:', payload);
+          
+          fetch(config.endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${config.apiKey}`
+            },
+            body: JSON.stringify(payload)
+          })
+          .then(response => {
+            console.log('API response status:', response.status);
+            
+            if (!response.ok) {
+              if (response.status === 422) {
+                throw new Error('API request format is incorrect (422 error). Please check API documentation for the correct format.');
+              } else if (response.status === 401 || response.status === 403) {
+                throw new Error('Authentication failed. Please check your API key.');
+              } else {
+                throw new Error(`API request failed with status: ${response.status}`);
+              }
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('API response data:', data);
+            
+            // Extract and trim the Ecore content from the response
+            // This structure might need adjustment based on actual API response format
+            let ecoreContent;
+            
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+              // ChatGPT-style API response
+              ecoreContent = data.choices[0].message.content;
+            } else if (data.choices && data.choices[0] && data.choices[0].text) {
+              // Older GPT-style API response
+              ecoreContent = data.choices[0].text;
+            } else if (data.output) {
+              // Generic output field
+              ecoreContent = data.output;
+            } else if (data.content) {
+              // Direct content field
+              ecoreContent = data.content;
+            } else {
+              console.error('Unexpected API response structure:', data);
+              throw new Error('Could not extract Ecore content from API response');
+            }
+            
+            // Trim any markdown code block indicators and whitespace
+            ecoreContent = ecoreContent.replace(/```xml|```ecore|```/g, '').trim();
+            
+            console.log('Extracted Ecore content (first 100 chars):', ecoreContent.substring(0, 100));
+            resolve(ecoreContent);
+          })
+          .catch(error => {
+            console.error('Error generating Ecore:', error);
+            reject(error);
+          });
+        } catch (error) {
+          console.error('Error in generateEcore:', error);
+          reject(error);
+        }
+      });
+    }
+
+    /**
+     * Creates a Question component that displays the question, instructions, and examples
+     * @param {Object} question - The question object with properties: question, instructions, examples
+     * @param {Function} onAnswer - Callback function when answer is submitted
+     * @returns {HTMLElement} - The question component DOM element
+     */
+    function createQuestionComponent(question, onAnswer) {
+      // Create the container
+      const container = document.createElement('div');
+      container.className = 'card';
+      
+      // Create the card content
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      
+      // Add question title
+      const questionTitle = document.createElement('h5');
+      questionTitle.textContent = question.question;
+      content.appendChild(questionTitle);
+      
+      // Add instructions
+      const instructions = document.createElement('p');
+      instructions.textContent = question.instructions;
+      instructions.className = 'grey-text';
+      content.appendChild(instructions);
+      
+      // Create form
+      const form = document.createElement('form');
+      form.id = 'question-form';
+      
+      // Create textarea
+      const textareaDiv = document.createElement('div');
+      textareaDiv.className = 'input-field';
+      
+      const textarea = document.createElement('textarea');
+      textarea.id = 'question-input';
+      textarea.className = 'materialize-textarea';
+      textarea.placeholder = question.examples;
+      textareaDiv.appendChild(textarea);
+      
+      form.appendChild(textareaDiv);
+      
+      // Add examples as helper text
+      const exampleText = document.createElement('p');
+      exampleText.className = 'example-text';
+      exampleText.textContent = question.examples;
+      form.appendChild(exampleText);
+      
+      // Create button container
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'card-action right-align';
+      
+      // Create submit button
+      const submitButton = document.createElement('button');
+      submitButton.type = 'submit';
+      submitButton.className = 'btn waves-effect waves-light indigo';
+      submitButton.textContent = 'Continue';
+      
+      // Add icon to button
+      const icon = document.createElement('i');
+      icon.className = 'material-icons right';
+      icon.textContent = 'send';
+      submitButton.appendChild(icon);
+      
+      buttonContainer.appendChild(submitButton);
+      form.appendChild(buttonContainer);
+      
+      // Handle form submission
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const answer = textarea.value.trim();
+        if (answer) {
+          onAnswer(answer);
+        }
+      });
+      
+      content.appendChild(form);
+      container.appendChild(content);
+      
+      return container;
+    }
+
+    /**
+     * Creates a Result component that displays the domain object summary
+     * @param {Object} domainObject - The domain object with domain, entities, and relationships
+     * @param {boolean} isLoading - Whether the API request is in progress
+     * @returns {HTMLElement} - The result component DOM element
+     */
+    function createResultComponent(domainObject, isLoading) {
+      // Create the container
+      const container = document.createElement('div');
+      container.className = 'card';
+      
+      // Create the card content
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      
+      // Add title
+      const title = document.createElement('h5');
+      title.textContent = 'Your DSL Summary';
+      content.appendChild(title);
+      
+      if (isLoading) {
+        // Create loader
+        const loaderWrapper = document.createElement('div');
+        loaderWrapper.className = 'loader-wrapper';
+        
+        const loader = document.createElement('div');
+        loader.className = 'preloader-wrapper active';
+        
+        const spinnerLayer = document.createElement('div');
+        spinnerLayer.className = 'spinner-layer spinner-blue-only';
+        
+        const clipperLeft = document.createElement('div');
+        clipperLeft.className = 'circle-clipper left';
+        const circleLeft = document.createElement('div');
+        circleLeft.className = 'circle';
+        clipperLeft.appendChild(circleLeft);
+        
+        const gapPatch = document.createElement('div');
+        gapPatch.className = 'gap-patch';
+        const circleGap = document.createElement('div');
+        circleGap.className = 'circle';
+        gapPatch.appendChild(circleGap);
+        
+        const clipperRight = document.createElement('div');
+        clipperRight.className = 'circle-clipper right';
+        const circleRight = document.createElement('div');
+        circleRight.className = 'circle';
+        clipperRight.appendChild(circleRight);
+        
+        spinnerLayer.appendChild(clipperLeft);
+        spinnerLayer.appendChild(gapPatch);
+        spinnerLayer.appendChild(clipperRight);
+        
+        loader.appendChild(spinnerLayer);
+        loaderWrapper.appendChild(loader);
+        
+        const loadingText = document.createElement('p');
+        loadingText.className = 'flow-text';
+        loadingText.style.marginLeft = '20px';
+        loadingText.textContent = 'Generating Ecore file...';
+        loaderWrapper.appendChild(loadingText);
+        
+        content.appendChild(loaderWrapper);
+      } else {
+        // Display domain information
+        const domainSection = document.createElement('div');
+        
+        const domainLabel = document.createElement('h6');
+        domainLabel.textContent = 'Domain:';
+        domainSection.appendChild(domainLabel);
+        
+        const domainValue = document.createElement('p');
+        domainValue.textContent = domainObject.domain;
+        domainValue.className = 'mb-3';
+        domainSection.appendChild(domainValue);
+        
+        content.appendChild(domainSection);
+        
+        // Display entities
+        const entitiesSection = document.createElement('div');
+        
+        const entitiesLabel = document.createElement('h6');
+        entitiesLabel.textContent = 'Entities:';
+        entitiesSection.appendChild(entitiesLabel);
+        
+        const entitiesValue = document.createElement('p');
+        entitiesValue.textContent = domainObject.entities.join(', ');
+        entitiesValue.className = 'mb-3';
+        entitiesSection.appendChild(entitiesValue);
+        
+        content.appendChild(entitiesSection);
+        
+        // Display relationships
+        const relationshipsSection = document.createElement('div');
+        
+        const relationshipsLabel = document.createElement('h6');
+        relationshipsLabel.textContent = 'Relationships:';
+        relationshipsSection.appendChild(relationshipsLabel);
+        
+        const relationshipsList = document.createElement('ul');
+        relationshipsList.className = 'collection';
+        
+        domainObject.relationships.forEach(rel => {
+          const listItem = document.createElement('li');
+          listItem.className = 'collection-item';
+          listItem.textContent = `${rel.source} (${rel.relationship}) ${rel.target}`;
+          relationshipsList.appendChild(listItem);
+        });
+        
+        relationshipsSection.appendChild(relationshipsList);
+        content.appendChild(relationshipsSection);
+      }
+      
+      container.appendChild(content);
+      return container;
+    }
+
+    /**
+     * Creates an Ecore Download component that provides a download link for the generated Ecore file
+     * @param {string} ecoreContent - The generated Ecore XML content
+     * @param {string} domain - The domain name for the file name
+     * @returns {HTMLElement} - The download component DOM element
+     */
+    function createEcoreDownloadComponent(ecoreContent, domain) {
+      // Create the container
+      const container = document.createElement('div');
+      container.className = 'card';
+      
+      // Create the card content
+      const content = document.createElement('div');
+      content.className = 'card-content';
+      
+      // Add title
+      const title = document.createElement('h5');
+      title.textContent = 'Your Ecore File is Ready!';
+      content.appendChild(title);
+      
+      // Add description
+      const description = document.createElement('p');
+      description.textContent = 'Your DSL has been successfully converted to Ecore format. Click the button below to download.';
+      description.className = 'mb-3';
+      content.appendChild(description);
+      
+      // Add code preview
+      const previewContainer = document.createElement('div');
+      previewContainer.className = 'code-preview';
+      
+      const previewContent = document.createElement('pre');
+      // Show only first 500 characters as preview
+      previewContent.textContent = ecoreContent.substring(0, 500) + '... (preview)';
+      previewContainer.appendChild(previewContent);
+      
+      content.appendChild(previewContainer);
+      
+      // Create button container for actions
+      const actions = document.createElement('div');
+      actions.className = 'card-action center-align';
+      
+      // Create download button
+      const downloadButton = document.createElement('a');
+      downloadButton.className = 'waves-effect waves-light btn-large indigo';
+      downloadButton.innerHTML = '<i class="material-icons left">file_download</i> Download ' + domain + '_dsl.ecore';
+      
+      // Handle download click
+      downloadButton.addEventListener('click', () => {
+        // Create a Blob with the Ecore content
+        const blob = new Blob([ecoreContent], { type: 'application/xml' });
+        
+        // Create a download URL for the Blob
+        const url = URL.createObjectURL(blob);
+        
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${domain}_dsl.ecore`;
+        
+        // Append to the document, click, and remove
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Release the URL object
+        URL.revokeObjectURL(url);
+      });
+      
+      actions.appendChild(downloadButton);
+      container.appendChild(content);
+      container.appendChild(actions);
+      
+      return container;
+    }
+
+    /**
+     * ChatBot component for managing the DSL generation process
+     */
+    class ChatBot {
+      constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.currentQuestionIndex = 0;
+        this.answers = {};
+        this.domainObject = null;
+        this.ecoreContent = null;
+        this.isLoading = false;
+        this.error = null;
+        
+        // Bind methods to this instance
+        this.handleAnswer = this.handleAnswer.bind(this);
+        this.renderCurrentQuestion = this.renderCurrentQuestion.bind(this);
+        this.renderResult = this.renderResult.bind(this);
+        this.renderDownload = this.renderDownload.bind(this);
+        this.renderError = this.renderError.bind(this);
+        this.reset = this.reset.bind(this);
+        this.updateStepper = this.updateStepper.bind(this);
+        
+        // Start the process
+        this.renderCurrentQuestion();
+      }
+      
+      /**
+       * Updates the stepper to show current progress
+       */
+      updateStepper() {
+        const steps = document.querySelectorAll('#stepper .step');
+        steps.forEach((step, index) => {
+          // First clear all classes
+          step.classList.remove('active', 'completed');
+          
+          // Add appropriate class
+          if (index < this.currentQuestionIndex) {
+            step.classList.add('completed');
+          } else if (index === this.currentQuestionIndex) {
+            step.classList.add('active');
+          }
+        });
+      }
+      
+      /**
+       * Handles answers from the question component
+       * @param {string} answer - The user's answer
+       */
+      async handleAnswer(answer) {
+        const currentQuestion = config.questions[this.currentQuestionIndex];
+        let parsedAnswer;
+
+        // Parse answer based on the question type
+        switch (currentQuestion.step) {
+          case 'gatherDomain':
+            parsedAnswer = parseDomain(answer);
+            break;
+          case 'gatherEntities':
+            parsedAnswer = parseEntities(answer);
+            break;
+          case 'gatherRelationships':
+            parsedAnswer = parseRelationships(answer);
+            break;
+          default:
+            parsedAnswer = answer;
+        }
+
+        // Update answers state
+        this.answers[currentQuestion.step] = parsedAnswer;
+
+        // Move to the next question or finalize
+        if (this.currentQuestionIndex < config.questions.length - 1) {
+          this.currentQuestionIndex++;
+          this.updateStepper();
+          this.renderCurrentQuestion();
+        } else {
+          // All questions answered, build the domain object
+          this.domainObject = buildDomainObject(this.answers);
+          this.updateStepper();
+          this.renderResult();
+          
+          // Generate Ecore using the API
+          try {
+            this.isLoading = true;
+            this.renderResult(); // Re-render with loading state
+            
+            // If API credentials are not set, use mock data for demo
+            if (
+              config.apiKey === 'YOUR_API_KEY_HERE' || 
+              config.endpoint === 'YOUR_ENDPOINT_HERE' || 
+              config.modelName === 'YOUR_MODEL_NAME_HERE'
+            ) {
+              // Create a mock Ecore content for demo purposes
+              setTimeout(() => {
+                const mockEcore = `<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="${this.domainObject.domain}" nsURI="http://www.example.org/${this.domainObject.domain}"
+    nsPrefix="${this.domainObject.domain}">
+  
+  <!-- Entity Classes -->
+  ${this.domainObject.entities.map(entity => 
+    `<eClassifiers xsi:type="ecore:EClass" name="${entity}">
+    ${this.domainObject.relationships
+      .filter(rel => rel.source === entity || rel.target === entity)
+      .map(rel => {
+        if (rel.source === entity) {
+          return `<eStructuralFeatures xsi:type="ecore:EReference" name="${rel.relationship}" eType="#//${rel.target}" lowerBound="0" upperBound="1"/>`;
+        } else if (rel.target === entity) {
+          return `<eStructuralFeatures xsi:type="ecore:EReference" name="is${rel.relationship}By" eType="#//${rel.source}" lowerBound="0" upperBound="1"/>`;
+        }
+        return '';
+      }).join('\n    ')}
+  </eClassifiers>`).join('\n  ')}
+  
+</ecore:EPackage>`;
+                
+                this.ecoreContent = mockEcore;
+                this.isLoading = false;
+                this.renderDownload();
+              }, 1500);
+            } else {
+              // Use actual API
+              const generatedEcore = await generateEcore(this.domainObject);
+              this.ecoreContent = generatedEcore;
+              this.isLoading = false;
+              this.renderDownload();
+            }
+          } catch (err) {
+            console.error('Error in handleAnswer:', err);
+            this.error = `Error generating Ecore: ${err.message}`;
+            this.isLoading = false;
+            this.renderError();
+          }
+        }
+      }
+      
+      /**
+       * Renders the current question
+       */
+      renderCurrentQuestion() {
+        // Clear container
+        this.container.innerHTML = '';
+        
+        // Get current question
+        const currentQuestion = config.questions[this.currentQuestionIndex];
+        
+        // Create and render question component
+        const questionComponent = createQuestionComponent(currentQuestion, this.handleAnswer);
+        this.container.appendChild(questionComponent);
+        
+        // Initialize Materialize components if needed
+        if (window.M) {
+          M.updateTextFields();
+          M.textareaAutoResize(document.getElementById('question-input'));
+        }
+      }
+      
+      /**
+       * Renders the result/summary view
+       */
+      renderResult() {
+        // Clear container
+        this.container.innerHTML = '';
+        
+        // Create and render result component
+        const resultComponent = createResultComponent(this.domainObject, this.isLoading);
+        this.container.appendChild(resultComponent);
+      }
+      
+      /**
+       * Renders the download view
+       */
+      renderDownload() {
+        // Clear container
+        this.container.innerHTML = '';
+        
+        // Create and render download component
+        const downloadComponent = createEcoreDownloadComponent(this.ecoreContent, this.domainObject.domain);
+        this.container.appendChild(downloadComponent);
+      }
+      
+      /**
+       * Renders an error message
+       */
+      renderError() {
+        // Clear container
+        this.container.innerHTML = '';
+        
+        // Create error card
+        const errorCard = document.createElement('div');
+        errorCard.className = 'card';
+        
+        const cardContent = document.createElement('div');
+        cardContent.className = 'card-content';
+        
+        const errorTitle = document.createElement('h5');
+        errorTitle.className = 'error-message';
+        errorTitle.textContent = 'Error';
+        cardContent.appendChild(errorTitle);
+        
+        const errorMessage = document.createElement('p');
+        errorMessage.textContent = this.error;
+        cardContent.appendChild(errorMessage);
+        
+        // Add more detailed help text based on error message
+        const helpText = document.createElement('p');
+        if (this.error.includes('422')) {
+          helpText.innerHTML = `
+            This is likely a formatting issue with the API request. 
+            <br>
+            <ul>
+              <li>Confirm that your API endpoint is correct</li>
+              <li>Check if the API expects a different request structure</li>
+              <li>Verify the model name is correct</li>
+            </ul>
+            <a href="#" id="show-api-config" class="btn-small indigo lighten-1">Update API Configuration</a>
+          `;
+        } else if (this.error.includes('401') || this.error.includes('403')) {
+          helpText.innerHTML = `
+            This appears to be an authentication issue.
+            <br>
+            <ul>
+              <li>Check that your API key is valid and not expired</li>
+              <li>Ensure you have permission to use the specified model</li>
+            </ul>
+            <a href="#" id="show-api-config" class="btn-small indigo lighten-1">Update API Configuration</a>
+          `;
+        } else {
+          helpText.textContent = 'Please check your API configuration and try again.';
+        }
+        cardContent.appendChild(helpText);
+        
+        // Create button to restart
+        const cardAction = document.createElement('div');
+        cardAction.className = 'card-action';
+        
+        const restartButton = document.createElement('button');
+        restartButton.className = 'btn waves-effect waves-light indigo';
+        restartButton.textContent = 'Restart';
+        restartButton.addEventListener('click', () => {
+          this.reset();
+        });
+        
+        const demoButton = document.createElement('button');
+        demoButton.className = 'btn waves-effect waves-light green ml-2';
+        demoButton.style.marginLeft = '10px';
+        demoButton.textContent = 'Use Demo Mode';
+        demoButton.addEventListener('click', () => {
+          config.apiKey = 'YOUR_API_KEY_HERE';
+          config.endpoint = 'YOUR_ENDPOINT_HERE';
+          config.modelName = 'YOUR_MODEL_NAME_HERE';
+          
+          const warningDiv = document.createElement('div');
+          warningDiv.className = 'card-panel amber lighten-4';
+          warningDiv.innerHTML = `
+            <span class="orange-text text-darken-4">
+              <i class="material-icons left">info</i>
+              Switched to demo mode. Your changes will be saved with mock data.
+            </span>
+          `;
+          document.querySelector('.container').insertBefore(warningDiv, document.querySelector('#stepper').parentNode);
+          
+          // Continue with the flow
+          this.reset();
+        });
+        
+        cardAction.appendChild(restartButton);
+        cardAction.appendChild(demoButton);
+        
+        errorCard.appendChild(cardContent);
+        errorCard.appendChild(cardAction);
+        
+        this.container.appendChild(errorCard);
+        
+        // Add event listener for API config
+        setTimeout(() => {
+          const showApiConfigButton = document.getElementById('show-api-config');
+          if (showApiConfigButton) {
+            showApiConfigButton.addEventListener('click', (e) => {
+              e.preventDefault();
+              showApiConfigPanel();
+            });
+          }
+        }, 100);
+      }
+      
+      /**
+       * Resets the chatbot to start over
+       */
+      reset() {
+        this.currentQuestionIndex = 0;
+        this.answers = {};
+        this.domainObject = null;
+        this.ecoreContent = null;
+        this.isLoading = false;
+        this.error = null;
+        this.updateStepper();
+        this.renderCurrentQuestion();
+      }
+    }
+    
+    /**
+     * Shows the API configuration panel
+     */
+    function showApiConfigPanel() {
+      const panel = document.getElementById('api-config-panel');
+      panel.style.display = 'block';
+      
+      // Pre-fill with current values
+      document.getElementById('api-key').value = config.apiKey === 'YOUR_API_KEY_HERE' ? '' : config.apiKey;
+      document.getElementById('api-endpoint').value = config.endpoint === 'YOUR_ENDPOINT_HERE' ? '' : config.endpoint;
+      document.getElementById('api-model').value = config.modelName === 'YOUR_MODEL_NAME_HERE' ? '' : config.modelName;
+      
+      // Initialize Materialize inputs
+      if (window.M) {
+        M.updateTextFields();
+      }
+      
+      // Scroll to panel
+      panel.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    /**
+     * Hides the API configuration panel
+     */
+    function hideApiConfigPanel() {
+      const panel = document.getElementById('api-config-panel');
+      panel.style.display = 'none';
+    }
+    
+    /**
+     * Saves the API configuration
+     */
+    function saveApiConfig() {
+      const apiKey = document.getElementById('api-key').value.trim();
+      const apiEndpoint = document.getElementById('api-endpoint').value.trim();
+      const apiModel = document.getElementById('api-model').value.trim();
+      
+      if (apiKey && apiEndpoint && apiModel) {
+        config.apiKey = apiKey;
+        config.endpoint = apiEndpoint;
+        config.modelName = apiModel;
+        
+        // Show success message
+        M.toast({html: 'API configuration updated successfully!', classes: 'green'});
+        hideApiConfigPanel();
+      } else {
+        // Show error
+        M.toast({html: 'Please fill in all API configuration fields', classes: 'red'});
+      }
+    }
+
+    // Initialize the application when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Materialize components
+      const elems = document.querySelectorAll('.sidenav');
+      if (window.M && M.Sidenav) {
+        M.Sidenav.init(elems);
+      }
+      
+      // Initialize the chatbot
+      const chatBot = new ChatBot('chatbot-container');
+      
+      // Setup API config panel buttons
+      document.getElementById('save-api-config').addEventListener('click', saveApiConfig);
+      document.getElementById('cancel-api-config').addEventListener('click', hideApiConfigPanel);
+      
+      // Display a warning if config values haven't been changed
+      if (
+        config.apiKey === 'YOUR_API_KEY_HERE' || 
+        config.endpoint === 'YOUR_ENDPOINT_HERE' || 
+        config.modelName === 'YOUR_MODEL_NAME_HERE'
+      ) {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'card-panel amber lighten-4';
+        warningDiv.innerHTML = `
+          <span class="orange-text text-darken-4">
+            <i class="material-icons left">info</i>
+            Using demo mode since API credentials are not set. 
+            <a href="#" id="warning-config-link">Update API Configuration</a>
+          </span>
+        `;
+        document.querySelector('.container').insertBefore(warningDiv, document.querySelector('#stepper').parentNode);
+        
+        // Add event listener for the config link
+        setTimeout(() => {
+          document.getElementById('warning-config-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            showApiConfigPanel();
+          });
+        }, 100);
+      }
+    });
+  </script>
 </body>
 </html>

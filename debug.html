@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ecore DSL Generator (Debug Mode)</title>
+  
+  <!-- Material UI CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    #debug-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #f0f0f0;
+      border-top: 1px solid #ccc;
+      padding: 10px;
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    #debug-panel.hidden {
+      display: none;
+    }
+    
+    #debug-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="indigo">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">Ecore DSL Generator (Debug)</a>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+    <div class="section">
+      <div class="row center-align">
+        <h4>DSL Builder</h4>
+        <p class="grey-text">Create your Domain Specific Language in Ecore format</p>
+      </div>
+
+      <!-- Test API Button -->
+      <div class="row center-align">
+        <button id="test-api" class="btn orange">Test API Connection</button>
+        <div id="api-result" class="mt-3"></div>
+      </div>
+
+      <!-- Stepper -->
+      <div class="row">
+        <div class="col s12">
+          <ul class="stepper horizontal" id="stepper">
+            <li class="step active">
+              <div class="step-title waves-effect">Domain</div>
+            </li>
+            <li class="step">
+              <div class="step-title waves-effect">Entities</div>
+            </li>
+            <li class="step">
+              <div class="step-title waves-effect">Relationships</div>
+            </li>
+            <li class="step">
+              <div class="step-title waves-effect">Generate</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Chat Bot Container -->
+      <div id="chatbot-container"></div>
+    </div>
+  </div>
+  
+  <!-- Debug Panel Toggle -->
+  <button id="debug-toggle" class="btn-floating btn-large red">
+    <i class="material-icons">bug_report</i>
+  </button>
+  
+  <!-- Debug Panel -->
+  <div id="debug-panel" class="hidden">
+    <h6>Debug Information</h6>
+    <div id="debug-log"></div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="page-footer indigo">
+    <div class="footer-copyright">
+      <div class="container">
+        © 2025 Ecore DSL Generator
+      </div>
+    </div>
+  </footer>
+
+  <!-- Debug Script -->
+  <script>
+    // Override console.log to capture logs
+    const originalConsoleLog = console.log;
+    const originalConsoleError = console.error;
+    
+    console.log = function() {
+      const args = Array.from(arguments);
+      const logEntry = document.createElement('div');
+      logEntry.textContent = args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg) : arg
+      ).join(' ');
+      document.getElementById('debug-log').appendChild(logEntry);
+      originalConsoleLog.apply(console, arguments);
+    };
+    
+    console.error = function() {
+      const args = Array.from(arguments);
+      const logEntry = document.createElement('div');
+      logEntry.style.color = 'red';
+      logEntry.textContent = 'ERROR: ' + args.map(arg => 
+        typeof arg === 'object' ? JSON.stringify(arg) : arg
+      ).join(' ');
+      document.getElementById('debug-log').appendChild(logEntry);
+      originalConsoleError.apply(console, arguments);
+    };
+    
+    // Add debug panel toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const debugToggle = document.getElementById('debug-toggle');
+      const debugPanel = document.getElementById('debug-panel');
+      
+      debugToggle.addEventListener('click', function() {
+        debugPanel.classList.toggle('hidden');
+      });
+      
+      // Test API button
+      document.getElementById('test-api').addEventListener('click', function() {
+        const apiResult = document.getElementById('api-result');
+        apiResult.innerHTML = '<div class="progress"><div class="indeterminate"></div></div>';
+        
+        try {
+          // Create a simple test object
+          const testObject = {
+            domain: 'test',
+            entities: ['Entity1', 'Entity2'],
+            relationships: [
+              { source: 'Entity1', relationship: 'connects to', target: 'Entity2' }
+            ]
+          };
+          
+          console.log('Testing API with:', testObject);
+          
+          generateEcore(testObject)
+            .then(result => {
+              apiResult.innerHTML = '<div class="card-panel green lighten-4">API test successful!</div>';
+              console.log('API test successful, result:', result.substring(0, 100) + '...');
+            })
+            .catch(error => {
+              apiResult.innerHTML = '<div class="card-panel red lighten-4">API test failed: ' + error.message + '</div>';
+              console.error('API test failed:', error);
+            });
+        } catch (error) {
+          apiResult.innerHTML = '<div class="card-panel red lighten-4">Error setting up API test: ' + error.message + '</div>';
+          console.error('Error setting up API test:', error);
+        }
+      });
+    });
+  </script>
+
+  <!-- Configuration -->
+  <script>
+    // Configuration for the Ecore DSL Generator
+    const config = {
+    // Replace these values with your actual API credentials
+    apiKey: 'jYZpbwqDS8jE9VLbAhUj5HOhDvIlTNcK', // Your LePlatforme API key
+    endpoint: 'https://api.mistral.ai/v1/chat/completions', // LePlatforme API endpoint
+    modelName: 'istral-small-latest', // Model name for the completion
+      
+      // Questions to ask the user
+      questions: [
+        { 
+          step: 'gatherDomain', 
+          question: "Can you describe the domain of your DSL?", 
+          instructions: "Please provide a single word for the domain.", 
+          examples: "Examples: cycling, cooking" 
+        },
+        { 
+          step: 'gatherEntities', 
+          question: "What are the main concepts or things in your domain?", 
+          instructions: "Please provide the concepts separated by commas.", 
+          examples: "Examples: Bike, Rider, Race" 
+        },
+        { 
+          step: 'gatherRelationships', 
+          question: "How do these concepts relate to each other?", 
+          instructions: "Please provide the relationships in the format: A (relationship) B.", 
+          examples: "Examples:\n- Bike (owned by) Rider\n- Rider (participates in) Race" 
+        }
+      ]
+    };
+  </script>
+  
+  <!-- JavaScript Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  
+
+  
+  <!-- Application Scripts -->
+  <script src="js/utils/parser.js"></script>
+  <!-- Uncomment the line below and comment out the mock API when ready to use real API -->
+  <script src="js/services/apiService.js"></script>
+  <script src="js/components/questionComponent.js"></script>
+  <script src="js/components/resultComponent.js"></script>
+  <script src="js/components/ecoreDownloadComponent.js"></script>
+  <script src="js/components/chatBot.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
